@@ -2,6 +2,8 @@
   "name": "ctor-game",
   "private": true,
   "version": "0.1.0",
+  "packageManager": "pnpm@8.6.0",
+  
   "type": "module",
   "scripts": {
     "dev": "vite",
