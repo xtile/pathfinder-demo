@@ -10,6 +10,9 @@ import { reducer, initialState } from '@/store/reducer';
 import { AI } from '@/ai';
 import { checkEnd } from '@/utils/board';
 
+import { PositionStats } from '@/components/PositionStats';
+import { analyzePosition } from '@/utils/analysis';
+
 export const Game = () => {
   const [st, dispatch] = useReducer(reducer, initialState);
   const [op, setOp] = useState(O.PL);
@@ -18,6 +21,11 @@ export const Game = () => {
   const [msg, setMsg] = useState('');
   const [map, setMap] = useState(true);
   const [ai, setAi] = useState(true);
+
+  const stats = useMemo(() => ({
+    p1: analyzePosition(st.board, P.A),
+    p2: analyzePosition(st.board, P.B)
+  }), [st.board]);  
 
   useEffect(() => {
     const aiTurn = async () => {
@@ -77,6 +85,27 @@ export const Game = () => {
           </div>
         </div>
         {/* UI остается так же... */}
+
+        {/* Добавляем статистику под доской */}
+        <div className="mt-4 flex justify-around">
+          <PositionStats player={1} stats={stats.p1} />
+          <div className="w-px bg-gray-200 mx-4" /> {/* разделитель */}
+          <PositionStats player={2} stats={stats.p2} />
+        </div>
+
+        {/* Добавляем относительную силу позиции */}
+        <div className="mt-4 bg-gray-100 rounded-lg p-2">
+          <div className="relative h-2 bg-gray-300 rounded-full overflow-hidden">
+            <div 
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-red-500"
+              style={{
+                width: '100%',
+                transform: `translateX(${(stats.p2.total - stats.p1.total) / 
+                  (stats.p1.total + stats.p2.total) * 50}%)`
+              }}
+            />
+          </div>
+        </div>        
       </Card>
       <AlertDialog open={alt} onOpenChange={setAlt}>
         {/* AlertDialog остается так же... */}
