@@ -1,11 +1,10 @@
 // src/pages/Game.tsx
+import { AlertDialog, Button, Card, Switch, Label } from '@/components/ui';
+
 import React, { useReducer, useState, useMemo, useEffect } from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Cell } from '@/components/Cell';
+
+import { Cell } from '@/components/cell';
 import { PositionStats } from '@/components/PositionStats';
 import { P, O, A, S , type Board } from '@/types';
 import { reducer, initialState } from '@/store/reducer';
