@@ -1,3 +1,15 @@
+import { Board, P, S } from '@/types';
+import { n } from '@/utils/board';
+
+export type PositionStrength = {
+  pieces: number;
+  territory: number;
+  influence: number;
+  groupsStrength: number;
+  total: number;
+};
+
+
 export const analyzePosition = (board: Board, player: number): PositionStrength => {
   const pieces = board.flat().filter(c => c === player).length;
   let territory = 0;
