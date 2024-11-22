@@ -1,5 +1,7 @@
-import { Board, P, O, Move } from '../types';
 import { n } from '../utils/board';
+
+import { S, P, O, Board, Move } from '@/types';
+
 
 export const AI = {
   findMove: (b: Board, p: number, op: string): Move | null => {
