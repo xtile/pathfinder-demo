@@ -1,4 +1,7 @@
 
+import { P} from '@/types';
+
+
 
 type CellProps = {
   x: number;

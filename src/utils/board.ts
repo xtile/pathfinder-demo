@@ -1,4 +1,4 @@
-import { Board, P, S } from '../types';
+import { Board, P, S } from '@/types';
 
 export const n = (c: number): number => {
   while (c < 0) c += S;

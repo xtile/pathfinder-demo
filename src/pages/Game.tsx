@@ -1,12 +1,10 @@
-// src/pages/Game.tsx
-import { AlertDialog, Button, Card, Switch, Label } from '@/components/ui';
-
-import React, { useReducer, useState, useMemo, useEffect } from 'react';
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, Card, Switch, Label } from '@/components/ui';
+import { useReducer, useState, useMemo, useEffect } from 'react';
+import { AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 import { Cell } from '@/components/cell';
 import { PositionStats } from '@/components/PositionStats';
-import { P, O, A, S , type Board } from '@/types';
+import { P, O, A, S , Position} from '@/types';
 import { reducer, initialState } from '@/store/reducer';
 import { AI } from '@/ai';
 import { checkEnd } from '@/utils/board';
@@ -14,55 +12,55 @@ import { analyzePosition } from '@/utils/analysis';
 import { replace } from '@/utils/board';
 
 export const Game = () => {
- const [st, dispatch] = useReducer(reducer, initialState);
- const [op, setOp] = useState(O.PL);
- const [sel, setSel] = useState(null);
- const [alt, setAlt] = useState(false);
- const [msg, setMsg] = useState('');
- const [map, setMap] = useState(true);
- const [ai, setAi] = useState(true);
+  const [st, dispatch] = useReducer(reducer, initialState);
 
+  const [op, _setOp] = useState(O.PL);
+  const [sel, _setSel] = useState<Position | null>(null);
 
- 
+  const [alt, setAlt] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [map, setMap] = useState(true);
+  const [ai, setAi] = useState(true);
 
- useEffect(() => {
-   const aiTurn = async () => {
-     if (!ai || st.p !== P.B || st.ops !== 2) return;
-     
-     let updBoard = st.board.map(r => [...r]);
-     
-     const m1 = AI.findMove(updBoard, P.B, O.PL);
-     if (!m1) {
-       dispatch({type: A.ET});
-       return;
-     }
-     
-     dispatch({type: A.PL, x: m1.x, y: m1.y, p: P.B});
-     dispatch({type: A.RP});
-     
-     updBoard[m1.x][m1.y] = P.B;
-     updBoard = replace(updBoard);
-     
-     await new Promise(r => setTimeout(r, 500));
-     
-     const m2 = AI.findMove(updBoard, P.B, O.PL);
-     if (!m2) {
-       dispatch({type: A.ET});
-       return;
-     }
-     
-     dispatch({type: A.PL, x: m2.x, y: m2.y, p: P.B});
-     dispatch({type: A.RP});
-     
-     await new Promise(r => setTimeout(r, 300));
-     dispatch({type: A.ET});
-   };
+  useEffect(() => {
+    const aiTurn = async () => {
+      if (!ai || st.p !== P.B || st.ops !== 2) return;
+      
+      let updBoard = st.board.map(r => [...r]);
+      
+      const m1 = AI.findMove(updBoard, P.B, O.PL);
+      if (!m1) {
+        dispatch({type: A.ET});
+        return;
+      }
+      
+      dispatch({type: A.PL, x: m1.x, y: m1.y, p: P.B});
+      dispatch({type: A.RP});
+      
+      updBoard[m1.x][m1.y] = P.B;
+      updBoard = replace(updBoard);
+      
+      await new Promise(r => setTimeout(r, 500));
+      
+      const m2 = AI.findMove(updBoard, P.B, O.PL);
+      if (!m2) {
+        dispatch({type: A.ET});
+        return;
+      }
+      
+      dispatch({type: A.PL, x: m2.x, y: m2.y, p: P.B});
+      dispatch({type: A.RP});
+      
+      await new Promise(r => setTimeout(r, 300));
+      dispatch({type: A.ET});
+    };
 
-   if (ai && st.p === P.B && st.ops === 2) {
-     const timer = setTimeout(aiTurn, 500);
-     return () => clearTimeout(timer);
-   }
- }, [ai, st.p, st.ops]);
+    if (ai && st.p === P.B && st.ops === 2) {
+      const timer = setTimeout(aiTurn, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [ai, st.p, st.ops]);
+
 
  const stats = useMemo(() => ({
    p1: analyzePosition(st.board, P.A),

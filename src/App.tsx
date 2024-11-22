@@ -1,5 +1,11 @@
 import { Game } from '@/pages/Game';
 
-export default function App() {
-  return <Game />;
+function App() {
+  return (
+    <div className="App">
+      <Game />
+    </div>
+  )
 }
+
+export default App
