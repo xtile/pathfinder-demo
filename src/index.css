@@ -131,3 +131,12 @@ body {
 .no-select {
   user-select: none;
 }
+
+.grid {
+    display: grid !important;
+    grid-auto-flow: row dense;
+  }
+  
+  .grid-cols-10 {
+    grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
+  }

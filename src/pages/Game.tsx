@@ -10,6 +10,7 @@ import { AI } from '@/ai';
 import { checkEnd } from '@/utils/board';
 import { analyzePosition } from '@/utils/analysis';
 import { replace } from '@/utils/board';
+import React from 'react';
 
 export const Game = () => {
  const [st, dispatch] = useReducer(reducer, initialState);
@@ -100,7 +101,7 @@ export const Game = () => {
 
  return (
   <div className="flex flex-col items-center p-4 gap-4">
-    <Card className="p-4">
+    <Card className="p-4 w-full">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">CTOR Game</h1>
         <div className="flex items-center gap-4">
@@ -132,20 +133,23 @@ export const Game = () => {
         </div>
       </div>
 
-      {/* Исправленная сетка */}
       <div className="grid grid-cols-10 gap-1 bg-gray-200 p-2">
-        {st.board.map((r,x) => r.map((c,y) => (
-          <Cell 
-            key={`${x}-${y}`} 
-            x={x} 
-            y={y} 
-            v={c} 
-            s={scores[x][y]}
-            sel={sel}
-            map={map}
-            onClick={() => click(x, y)}
-          />
-        )))}
+        {Array.from({ length: 10 }, (_, x) => (
+          <React.Fragment key={x}>
+            {Array.from({ length: 10 }, (_, y) => (
+              <Cell
+                key={`${x}-${y}`}
+                x={x}
+                y={y}
+                v={st.board[x][y]}
+                s={scores[x][y]}
+                sel={sel}
+                map={map}
+                onClick={() => click(x, y)}
+              />
+            ))}
+          </React.Fragment>
+        ))}
       </div>
 
       {/* Position analysis */}
