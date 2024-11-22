@@ -1,8 +1,8 @@
 
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
-RUN npm install -g pnpm@8.6.0
+RUN npm install -g pnpm
 
 COPY package.json ./
 COPY pnpm-lock.yaml ./
