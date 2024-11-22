@@ -1,7 +1,8 @@
 // src/test/ai.test.ts
+ 
 import { describe, it, expect } from 'vitest';
 import { AI } from '@/ai';
-import { P, S, O, Board } from '@/types';  // добавили импорт O
+import { P, O, S, Board } from '@/types';
 
 describe('AI', () => {
   const createEmptyBoard = (): Board => 
