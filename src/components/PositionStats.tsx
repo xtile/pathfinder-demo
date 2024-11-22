@@ -1,11 +1,11 @@
-// src/components/PositionStats.tsx
-import React from 'react';
-import { PositionStrength } from '@/utils/analysis';
+import { type PositionStrength } from '@/utils/analysis';
 
 type PositionStatsProps = {
-  player: number;  // 1 или 2
+  player: number;
   stats: PositionStrength;
 };
+
+
 
 export const PositionStats = ({ player, stats }: PositionStatsProps) => {
   const color = player === 1 ? 'blue' : 'red';
