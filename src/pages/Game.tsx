@@ -1,10 +1,11 @@
+import React from 'react';
 import { AlertDialog, Card, Switch, Label } from '@/components/ui';
 import { useReducer, useState, useMemo, useEffect } from 'react';
 import { AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 import { Cell } from '@/components/cell';
 import { PositionStats } from '@/components/PositionStats';
-import { P, O, A, S , Position} from '@/types';
+import { P, O, A, S, Position } from '@/types';
 import { reducer, initialState } from '@/store/reducer';
 import { AI } from '@/ai';
 import { checkEnd } from '@/utils/board';
@@ -12,55 +13,52 @@ import { analyzePosition } from '@/utils/analysis';
 import { replace } from '@/utils/board';
 
 export const Game = () => {
-  const [st, dispatch] = useReducer(reducer, initialState);
+ const [st, dispatch] = useReducer(reducer, initialState);
+ const [op, _setOp] = useState(O.PL);
+ const [sel, _setSel] = useState<Position | null>(null);
+ const [alt, setAlt] = useState(false);
+ const [msg, setMsg] = useState('');
+ const [map, setMap] = useState(true);
+ const [ai, setAi] = useState(true);
 
-  const [op, _setOp] = useState(O.PL);
-  const [sel, _setSel] = useState<Position | null>(null);
+ useEffect(() => {
+   const aiTurn = async () => {
+     if (!ai || st.p !== P.B || st.ops !== 2) return;
+     
+     let updBoard = st.board.map(r => [...r]);
+     
+     const m1 = AI.findMove(updBoard, P.B, O.PL);
+     if (!m1) {
+       dispatch({type: A.ET});
+       return;
+     }
+     
+     dispatch({type: A.PL, x: m1.x, y: m1.y, p: P.B});
+     dispatch({type: A.RP});
+     
+     updBoard[m1.x][m1.y] = P.B;
+     updBoard = replace(updBoard);
+     
+     await new Promise(r => setTimeout(r, 500));
+     
+     const m2 = AI.findMove(updBoard, P.B, O.PL);
+     if (!m2) {
+       dispatch({type: A.ET});
+       return;
+     }
+     
+     dispatch({type: A.PL, x: m2.x, y: m2.y, p: P.B});
+     dispatch({type: A.RP});
+     
+     await new Promise(r => setTimeout(r, 300));
+     dispatch({type: A.ET});
+   };
 
-  const [alt, setAlt] = useState(false);
-  const [msg, setMsg] = useState('');
-  const [map, setMap] = useState(true);
-  const [ai, setAi] = useState(true);
-
-  useEffect(() => {
-    const aiTurn = async () => {
-      if (!ai || st.p !== P.B || st.ops !== 2) return;
-      
-      let updBoard = st.board.map(r => [...r]);
-      
-      const m1 = AI.findMove(updBoard, P.B, O.PL);
-      if (!m1) {
-        dispatch({type: A.ET});
-        return;
-      }
-      
-      dispatch({type: A.PL, x: m1.x, y: m1.y, p: P.B});
-      dispatch({type: A.RP});
-      
-      updBoard[m1.x][m1.y] = P.B;
-      updBoard = replace(updBoard);
-      
-      await new Promise(r => setTimeout(r, 500));
-      
-      const m2 = AI.findMove(updBoard, P.B, O.PL);
-      if (!m2) {
-        dispatch({type: A.ET});
-        return;
-      }
-      
-      dispatch({type: A.PL, x: m2.x, y: m2.y, p: P.B});
-      dispatch({type: A.RP});
-      
-      await new Promise(r => setTimeout(r, 300));
-      dispatch({type: A.ET});
-    };
-
-    if (ai && st.p === P.B && st.ops === 2) {
-      const timer = setTimeout(aiTurn, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [ai, st.p, st.ops]);
-
+   if (ai && st.p === P.B && st.ops === 2) {
+     const timer = setTimeout(aiTurn, 500);
+     return () => clearTimeout(timer);
+   }
+ }, [ai, st.p, st.ops]);
 
  const stats = useMemo(() => ({
    p1: analyzePosition(st.board, P.A),
@@ -102,52 +100,62 @@ export const Game = () => {
  }, [st.board, st.p]);
 
  return (
-   <div className="flex flex-col items-center p-4 gap-4">
-     <Card className="p-4">
-       <div className="flex justify-between items-center mb-4">
-         <h1 className="text-2xl font-bold">CTOR Game</h1>
-         <div className="flex items-center gap-4">
-           <div className="flex items-center gap-2">
-             <Switch checked={ai} onCheckedChange={setAi} id="ai"/>
-             <Label htmlFor="ai">AI Player 2</Label>
+   <div className="flex flex-col items-center p-4 gap-4 max-w-3xl mx-auto">
+     <Card className="w-full p-4">
+       {/* Header */}
+       <div className="space-y-4 mb-6">
+         <div className="flex justify-between items-center">
+           <h1 className="text-2xl font-bold">CTOR Game</h1>
+           <div className="flex items-center gap-4">
+             <div className="flex items-center gap-2">
+               <Switch checked={ai} onCheckedChange={setAi} id="ai"/>
+               <Label htmlFor="ai">AI Player 2</Label>
+             </div>
+             <div className="flex items-center gap-2">
+               <Switch checked={map} onCheckedChange={setMap} id="map"/>
+               <Label htmlFor="map">Heatmap</Label>
+             </div>
            </div>
-           <div className="flex items-center gap-2">
-             <Switch checked={map} onCheckedChange={setMap} id="map"/>
-             <Label htmlFor="map">Heatmap</Label>
+         </div>
+
+         <div className="flex justify-between items-center">
+           <div>
+             <span className="mr-4">Player: {st.p === P.A ? '1' : '2'}</span>
+             <span>Ops: {st.ops}</span>
+           </div>
+           <div className="flex gap-4">
+             <div className="flex items-center">
+               <div className="w-4 h-4 bg-blue-500 mr-2 rounded"/>
+               <span>P1: {st.board.flat().filter(c => c === P.A).length}</span>
+             </div>
+             <div className="flex items-center">
+               <div className="w-4 h-4 bg-red-500 mr-2 rounded"/>
+               <span>P2: {st.board.flat().filter(c => c === P.B).length}</span>
+             </div>
            </div>
          </div>
        </div>
 
-       <div className="flex justify-between items-center mb-4">
-         <div>
-           <span className="mr-4">Player: {st.p === P.A ? '1' : '2'}</span>
-           <span>Ops: {st.ops}</span>
+       {/* Game Grid */}
+       <div className="w-full">
+         <div className="grid grid-cols-10 gap-1 bg-gray-200 p-2 rounded-lg aspect-square">
+           {st.board.map((row, x) => (
+             <React.Fragment key={x}>
+               {row.map((cell, y) => (
+                 <Cell 
+                   key={`${x}-${y}`} 
+                   x={x} 
+                   y={y} 
+                   v={cell} 
+                   s={scores[x][y]}
+                   sel={sel}
+                   map={map}
+                   onClick={() => click(x, y)}
+                 />
+               ))}
+             </React.Fragment>
+           ))}
          </div>
-         <div className="flex gap-4">
-           <div className="flex items-center">
-             <div className="w-4 h-4 bg-blue-500 mr-2"/>
-             <span>P1: {st.board.flat().filter(c => c === P.A).length}</span>
-           </div>
-           <div className="flex items-center">
-             <div className="w-4 h-4 bg-red-500 mr-2"/>
-             <span>P2: {st.board.flat().filter(c => c === P.B).length}</span>
-           </div>
-         </div>
-       </div>
-
-       <div className="grid grid-cols-10 gap-1 bg-gray-200 p-2">
-         {st.board.map((r, x) => r.map((c, y) => (
-           <Cell 
-             key={`${x}-${y}`} 
-             x={x} 
-             y={y} 
-             v={c} 
-             s={scores[x][y]}
-             sel={sel}
-             map={map}
-             onClick={() => click(x, y)}
-           />
-         )))}
        </div>
 
        {/* Position analysis */}
@@ -170,7 +178,6 @@ export const Game = () => {
            />
          </div>
        </div>
-
      </Card>
 
      <AlertDialog open={alt} onOpenChange={setAlt}>
