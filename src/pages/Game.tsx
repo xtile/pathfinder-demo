@@ -1,23 +1,23 @@
-import { AlertDialog, Card, Switch, Label } from '@/components/ui';
+import {  Card, Switch, Label } from '@/components/ui';
 import { useReducer, useState, useMemo, useEffect } from 'react';
-import { AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+// import { AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 import { Cell } from '@/components/cell';
-import { PositionStats } from '@/components/PositionStats';
+// import { PositionStats } from '@/components/PositionStats';
 import { P, O, A, S, Position } from '@/types';
 import { reducer, initialState } from '@/store/reducer';
 import { AI } from '@/ai';
 import { checkEnd } from '@/utils/board';
 import { analyzePosition } from '@/utils/analysis';
 import { replace } from '@/utils/board';
-import React from 'react';
+// import React from 'react';
 
 export const Game = () => {
  const [st, dispatch] = useReducer(reducer, initialState);
  const [op, _setOp] = useState(O.PL);
  const [sel, _setSel] = useState<Position | null>(null);
- const [alt, setAlt] = useState(false);
- const [msg, setMsg] = useState('');
+ const [_alt, setAlt] = useState(false);
+ const [_msg, setMsg] = useState('');
  const [map, setMap] = useState(true);
  const [ai, setAi] = useState(true);
 
@@ -100,93 +100,126 @@ export const Game = () => {
  }, [st.board, st.p]);
 
  return (
-  <div className="flex flex-col items-center p-4 gap-4">
-    <Card className="p-4 w-full">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">CTOR Game</h1>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Switch checked={ai} onCheckedChange={setAi} id="ai"/>
-            <Label htmlFor="ai">AI Player 2</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch checked={map} onCheckedChange={setMap} id="map"/>
-            <Label htmlFor="map">Heatmap</Label>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <span className="mr-4">Player: {st.p === P.A ? '1' : '2'}</span>
-          <span>Ops: {st.ops}</span>
-        </div>
-        <div className="flex gap-4">
-          <div className="flex items-center">
-            <div className="w-4 h-4 bg-blue-500 mr-2"/>
-            <span>P1: {st.board.flat().filter(c => c === P.A).length}</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 bg-red-500 mr-2"/>
-            <span>P2: {st.board.flat().filter(c => c === P.B).length}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-10 gap-1 bg-gray-200 p-2">
-        {Array.from({ length: 10 }, (_, x) => (
-          <React.Fragment key={x}>
-            {Array.from({ length: 10 }, (_, y) => (
-              <Cell
-                key={`${x}-${y}`}
-                x={x}
-                y={y}
-                v={st.board[x][y]}
-                s={scores[x][y]}
-                sel={sel}
-                map={map}
-                onClick={() => click(x, y)}
+  <div className="flex flex-col items-center p-4">
+    <Card className="w-[600px]"> {/* Фиксированная ширина карточки */}
+      <div className="p-4 space-y-4"> {/* Общий контейнер с отступами */}
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">CTOR Game</h1>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <Switch 
+                checked={ai} 
+                onCheckedChange={setAi} 
+                id="ai"
+                className="data-[state=checked]:bg-blue-500"
               />
-            ))}
-          </React.Fragment>
-        ))}
-      </div>
+              <Label htmlFor="ai" className="text-sm">AI Player 2</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch 
+                checked={map} 
+                onCheckedChange={setMap} 
+                id="map"
+                className="data-[state=checked]:bg-blue-500"
+              />
+              <Label htmlFor="map" className="text-sm">Heatmap</Label>
+            </div>
+          </div>
+        </div>
 
-      {/* Position analysis */}
-      <div className="mt-4 flex justify-around">
-        <PositionStats player={1} stats={stats.p1} />
-        <div className="w-px bg-gray-200 mx-4" />
-        <PositionStats player={2} stats={stats.p2} />
-      </div>
+        {/* Game Status */}
+        <div className="flex justify-between items-center">
+          <div className="flex gap-4 text-sm">
+            <span>Player: {st.p === P.A ? '1' : '2'}</span>
+            <span>Ops: {st.ops}</span>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-blue-500 mr-2"/>
+              <span className="text-sm">P1: {st.board.flat().filter(c => c === P.A).length}</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-red-500 mr-2"/>
+              <span className="text-sm">P2: {st.board.flat().filter(c => c === P.B).length}</span>
+            </div>
+          </div>
+        </div>
 
-      {/* Position strength indicator */}
-      <div className="mt-4 bg-gray-100 rounded-lg p-2">
-        <div className="relative h-2 bg-gray-300 rounded-full overflow-hidden">
-          <div 
-            className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-red-500"
-            style={{
-              width: '100%',
-              transform: `translateX(${(stats.p2.total - stats.p1.total) / 
-                (stats.p1.total + stats.p2.total) * 50}%)`
-            }}
-          />
+        {/* Game Grid */}
+        <div className="bg-gray-100 p-2 rounded-lg">
+          <div className="grid grid-cols-10 gap-[2px] aspect-square">
+            {st.board.map((r, x) => 
+              r.map((c, y) => (
+                <Cell 
+                  key={`${x}-${y}`} 
+                  x={x} 
+                  y={y} 
+                  v={c} 
+                  s={scores[x][y]}
+                  sel={sel}
+                  map={map}
+                  onClick={() => click(x, y)}
+                />
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="flex justify-between mt-4">
+          {/* Player 1 Stats */}
+          <div className="bg-white rounded-lg p-3 border border-blue-500 w-[45%]">
+            <div className="font-bold mb-2">Player 1</div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+              <span className="text-gray-600">Pieces:</span>
+              <span>{stats.p1.pieces}</span>
+              <span className="text-gray-600">Territory:</span>
+              <span>{stats.p1.territory}%</span>
+              <span className="text-gray-600">Influence:</span>
+              <span>{stats.p1.influence}%</span>
+              <span className="text-gray-600">Group Str:</span>
+              <span>{stats.p1.groupsStrength}</span>
+              <span className="text-gray-600 pt-2 border-t">Total:</span>
+              <span className="font-bold text-blue-600 pt-2 border-t">{stats.p1.total}</span>
+            </div>
+          </div>
+
+          <div className="h-auto w-px bg-gray-200" />
+
+          {/* Player 2 Stats */}
+          <div className="bg-white rounded-lg p-3 border border-red-500 w-[45%]">
+            <div className="font-bold mb-2">Player 2</div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+              <span className="text-gray-600">Pieces:</span>
+              <span>{stats.p2.pieces}</span>
+              <span className="text-gray-600">Territory:</span>
+              <span>{stats.p2.territory}%</span>
+              <span className="text-gray-600">Influence:</span>
+              <span>{stats.p2.influence}%</span>
+              <span className="text-gray-600">Group Str:</span>
+              <span>{stats.p2.groupsStrength}</span>
+              <span className="text-gray-600 pt-2 border-t">Total:</span>
+              <span className="font-bold text-red-600 pt-2 border-t">{stats.p2.total}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Balance Bar */}
+        <div className="bg-gray-100 rounded p-2 mt-2">
+          <div className="relative h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-red-500"
+              style={{
+                width: '100%',
+                transform: `translateX(${(stats.p2.total - stats.p1.total) / 
+                  (stats.p1.total + stats.p2.total) * 50}%)`
+              }}
+            />
+          </div>
         </div>
       </div>
     </Card>
-
-    <AlertDialog open={alt} onOpenChange={setAlt}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Game Over</AlertDialogTitle>
-          <AlertDialogDescription>{msg}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogAction onClick={() => window.location.reload()}>
-            New Game
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   </div>
 );
 };
