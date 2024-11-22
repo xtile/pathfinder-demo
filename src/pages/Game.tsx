@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Cell } from '@/components/Cell';
 import { PositionStats } from '@/components/PositionStats';
-import { P, O, A, S } from '@/types';
+import { P, O, A, S , type Board } from '@/types';
 import { reducer, initialState } from '@/store/reducer';
 import { AI } from '@/ai';
 import { checkEnd } from '@/utils/board';
@@ -22,6 +22,9 @@ export const Game = () => {
  const [msg, setMsg] = useState('');
  const [map, setMap] = useState(true);
  const [ai, setAi] = useState(true);
+
+
+ 
 
  useEffect(() => {
    const aiTurn = async () => {
