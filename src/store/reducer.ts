@@ -1,3 +1,30 @@
+import { Board, P, S, A } from '@/types';
+
+export type GameState = {
+  board: Board;
+  p: number;
+  ops: number;
+};
+
+export type GameAction = {
+  type: keyof typeof A;
+  x?: number;
+  y?: number;
+  p?: number;
+  fx?: number;
+  fy?: number;
+  tx?: number;
+  ty?: number;
+};
+
+export const initialState: GameState = {
+  board: Array(S).fill(null).map(() => Array(S).fill(P.N)) as Board,
+  p: P.A,
+  ops: 2
+};
+
+
+
 import { GameState, GameAction, A, P } from '../types';
 import { replace } from '../utils/board';
 
@@ -22,8 +49,4 @@ export const reducer = (s: GameState, a: GameAction): GameState => {
   }
 };
 
-export const initialState: GameState = {
-  board: Array(S).fill(null).map(() => Array(S).fill(P.N)),
-  p: P.A,
-  ops: 2
-};
+
